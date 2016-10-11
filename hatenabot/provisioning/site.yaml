@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: install yum package
+      yum: name={{item}}
+      with_items:
+        - epel-release
+        - python-pip
+    - name: install pip package
+      pip: name=beautifulsoup4
