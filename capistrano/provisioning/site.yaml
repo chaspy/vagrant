@@ -1,0 +1,51 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    ruby_version: 2.3.1
+  tasks:
+    - name: install yum package
+      yum: name={{item}}
+      with_items:
+        - git
+        - openssl-devel
+        - readline-devel
+        - zlib-devel
+    - name: clone rbenv
+      git: >
+        repo='https://github.com/sstephenson/rbenv.git'
+        dest='/home/vagrant/.rbenv/'
+    - name: clone ruby-build
+      git: >
+        repo='https://github.com/sstephenson/ruby-build.git'
+        dest='/home/vagrant/.rbenv/plugins/ruby-build/'
+    - name: change owner
+      file: path='/home/vagrant/.rbenv' owner=vagrant state=directory recurse=yes
+    - name: add path(not idempotency)
+      # TODO: fragments
+      become: no
+      shell: echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+    - name: rbenv init
+      become: no
+      shell: echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
+    - name: install ruby-build
+      shell: /home/vagrant/.rbenv/plugins/ruby-build/install.sh
+    - name: reload bash_profile
+      shell: source /home/vagrant/.bash_profile
+    - name: check ruby already installed
+      shell: "sudo -iu vagrant rbenv versions | grep {{ ruby_version }} | awk '{print $2}'"
+      register: rbenv_ruby_version
+    - name: install ruby
+      shell: "sudo -iu vagrant rbenv install {{ ruby_version }}"
+      when: rbenv_ruby_version.stdout != '{{ ruby_version }}'
+    - name: rbenv rehash
+      shell: "sudo -iu vagrant rbenv rehash"
+    - name: rbenv global
+      shell: "sudo -iu vagrant rbenv global {{ ruby_version }}"
+    - name: install gem packages
+      become: no
+      gem: name={{item}} user_install=no executable=~/.rbenv/shims/gem
+      with_items:
+        - sshkit
+        - capistrano
+        - serverspec
