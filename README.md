@@ -12,3 +12,4 @@ this project is my own vagrant and virtual box VM's Vagrantifile, Playbook, and 
 * 192.168.100.100 - hatenabot
 * 192.168.100.101 - capistrano
 * 192.168.100.102 - phpipam
+* 192.168.100.104 - docker
