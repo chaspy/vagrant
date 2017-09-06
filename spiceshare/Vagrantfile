@@ -1,0 +1,12 @@
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "bento/centos-7.2"
+
+  config.vm.define :ss do | ss |
+    ss.vm.hostname = "spiceshare"
+    ss.vm.network :private_network, ip: "192.168.33.100"#, virtualbox__intnet: "intnet"
+  end
+  config.vm.provision :shell, :path => "./init.sh",:privileged   => true
+
+end
